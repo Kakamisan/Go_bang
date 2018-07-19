@@ -1,6 +1,7 @@
 #include"Game.h"
 
-Game::Game(session_ptr A, session_ptr B) :pA(A), pB(B), gameplay(new Chess()), ready_count(0) {}
+Game::Game(session_ptr A, session_ptr B)
+	:pA(A), pB(B), gameplay(new Chess()), ready_count(0), restart_flag(0) {}
 
 void Game::start() {
 	pA->set_msg_findplayer();
@@ -13,6 +14,13 @@ void Game::start() {
 void Game::run() {
 	pA->receive(this->msg_handler);
 	pB->receive(this->msg_handler);
+}
+
+void Game::re_run() {
+	gameplay->reset();
+	ready_count = 0;
+	restart_flag = 0;
+	start();
 }
 
 void Game::msg_handler(Session* const cur_se) {
@@ -59,7 +67,22 @@ void Game::msg_handler(Session* const cur_se) {
 	default:
 		break;
 	}
-	//do
+}
+
+void Game::restart_handler(Session* const cur_se){
+	if (cur_se->get_msg_head() == GODATA_HEAD_ACK) {
+		re_run();
+	}
+	else {
+		if ((*cur_se) == (*pA)) {
+			pB->set_msg_other_disconnect();
+			pB->send();
+		}
+		else {
+			pA->set_msg_other_disconnect();
+			pA->send();
+		}
+	}
 }
 
 void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
@@ -170,4 +193,24 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 	default:
 		break;
 	}
+}
+
+void Game::ghandler_surrender(session_ptr& cs, session_ptr& os) {
+	os->set_msg_other_surrender();
+	os->send();
+	os->receive(this->msg_handler);
+	cs->receive(this->msg_handler);
+}
+
+void Game::ghandler_disconnect(session_ptr& cs, session_ptr& os) {
+	os->set_msg_other_disconnect();
+	os->send();
+}
+
+void Game::ghandler_restart(session_ptr& cs, session_ptr& os) {
+	if (restart_flag)return;
+	restart_flag = 1;
+	os->set_msg_other_restart();
+	os->send();
+	os->receive(this->restart_handler);
 }

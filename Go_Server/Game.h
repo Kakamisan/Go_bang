@@ -16,6 +16,9 @@ private:
 
 			//准备计数，计数为2时表示双方均发送猜拳消息
 			int ready_count;
+
+			//重开标志，表示有一方提出重开，并防止同时提出重开时调用两次重开
+			int restart_flag;
 public:
 			//使用两个{session_ptr}构造，代表与两个玩家的session
 			Game(session_ptr A, session_ptr B);
@@ -34,8 +37,14 @@ private:
 			//游戏运行
 			void run();
 
+			//游戏重开
+			void re_run();
+
 			//消息处理回调函数，从session接收到消息时调用
 			void msg_handler(Session* const cur_se);
+
+			//重开处理回调函数，处理是否重开
+			void restart_handler(Session* const cur_se);
 
 			//收到消息为{GODATA_HEAD_PLAYERNAME}时在{msg_handler}中调用，代表收到了玩家名
 			void ghandler_playername(session_ptr& cs, session_ptr& os);
