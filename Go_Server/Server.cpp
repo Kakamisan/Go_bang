@@ -1,5 +1,7 @@
 #include"Server.h"
 
+Server *Server::instance = nullptr;
+
 Server* & Server::get_instance() {
 	if (instance != nullptr)return instance;
 	tcp::endpoint ep(tcp::v4(), SERVER_PORT);
@@ -18,8 +20,8 @@ void Server::accept_new_session() {
 	static int shared_id = 10000;
 	session_ptr new_session(new Session(m_io_service, ++shared_id));
 	m_q_sp.push(new_session);
-	m_acceptor.async_accept(new_session->m_socket,
-		boost::bind(&Server::accept_handler, this, std::move(new_session), boost::asio::placeholders::error)
+	m_acceptor.async_accept(new_session->get_socket(),
+		boost::bind(&Server::accept_handler, this, new_session, boost::asio::placeholders::error)
 	);
 }
 
@@ -42,7 +44,11 @@ void Server::accept_handler(session_ptr sp, const boost::system::error_code& ec)
 				}
 				else {
 					m_q_sp.pop();
-					game_ptr new_game(new Game(A, B));
+
+					static int id = 0;
+					game_ptr new_game(new Game(A, B, id));
+					id++;
+
 					new_game->start();
 				}
 			}

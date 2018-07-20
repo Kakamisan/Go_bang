@@ -61,7 +61,7 @@ int Godata::change_head(int h) {
 	return TRUE;
 }
 int Godata::change_data(const char* d) {
-	strcpy_s(&m_msg[1], min(sizeof(m_msg) - 1, strlen(d)), d);
+	strcpy_s(&m_msg[GODATA_DATA], min(sizeof(m_msg) - 1, strlen(d)), d);
 	return TRUE;
 }
 

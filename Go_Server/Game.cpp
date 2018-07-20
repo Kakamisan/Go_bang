@@ -1,7 +1,10 @@
 #include"Game.h"
 
-Game::Game(session_ptr A, session_ptr B)
-	:pA(A), pB(B), gameplay(new Chess()), ready_count(0), restart_flag(0) {}
+Game::Game(session_ptr A, session_ptr B, int id)
+	:pA(A), pB(B), game_id(id), gameplay(new Chess()), ready_count(0), restart_flag(0) 
+{
+	game_alive[id] = 1;
+}
 
 void Game::start() {
 	pA->set_msg_findplayer();
@@ -12,8 +15,8 @@ void Game::start() {
 }
 
 void Game::run() {
-	pA->receive(this->msg_handler);
-	pB->receive(this->msg_handler);
+	pA->receive(this, &Game::msg_handler, game_id);
+	pB->receive(this, &Game::msg_handler, game_id);
 }
 
 void Game::re_run() {
@@ -39,8 +42,7 @@ void Game::msg_handler(Session* const cur_se) {
 		return;
 	}
 	if (cs->test_error()) {
-		os->set_msg_other_disconnect();
-		os->send();
+		ghandler_disconnect(cs, os);
 		return;
 	}
 	char chead = cs->get_msg_head();
@@ -66,6 +68,12 @@ void Game::msg_handler(Session* const cur_se) {
 		ghandler_restart(cs, os);
 		break;
 	default:
+		os->set_msg_other_disconnect();
+		os->send();
+		cs->set_msg_other_disconnect();
+		cs->send();
+		game_alive[game_id] = 0;
+		delete this;
 		break;
 	}
 }
@@ -76,12 +84,10 @@ void Game::restart_handler(Session* const cur_se){
 	}
 	else {
 		if ((*cur_se) == (*pA)) {
-			pB->set_msg_other_disconnect();
-			pB->send();
+			ghandler_disconnect(pA, pB);
 		}
 		else {
-			pA->set_msg_other_disconnect();
-			pA->send();
+			ghandler_disconnect(pB, pA);
 		}
 	}
 }
@@ -99,7 +105,7 @@ void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 	os->set_msg_other_playname(temp);
 	os->send();
 	os->sighnal_unlock();
-	os->receive(this->msg_handler);
+	os->receive(this, &Game::msg_handler, game_id);
 }
 
 void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
@@ -152,8 +158,8 @@ void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
 		cs->send();
 		os->send();
 		ready_count = 0;
-		cs->receive(this->msg_handler);
-		os->receive(this->msg_handler);
+		cs->receive(this, &Game::msg_handler, game_id);
+		os->receive(this, &Game::msg_handler, game_id);
 	}
 }
 
@@ -174,29 +180,29 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 	case CHESS_FLAG_CONTINUE:
 		os->set_msg_other_set(cs->get_msg_data());
 		os->send();
-		os->receive(this->msg_handler);
+		os->receive(this, &Game::msg_handler, game_id);
 		break;
 	case CHESS_FLAG_A_WIN:
 		pA->set_msg_win(GODATA_DATA_WIN);
 		pB->set_msg_win(GODATA_DATA_LOSE);
 		pA->send();
 		pB->send();
-		pA->receive(this->msg_handler);
-		pB->receive(this->msg_handler);
+		pA->receive(this, &Game::msg_handler, game_id);
+		pB->receive(this, &Game::msg_handler, game_id);
 		break;
 	case CHESS_FLAG_B_WIN:
 		pA->set_msg_win(GODATA_DATA_LOSE);
 		pB->set_msg_win(GODATA_DATA_WIN);
 		pA->send();
 		pB->send();
-		pA->receive(this->msg_handler);
-		pB->receive(this->msg_handler);
+		pA->receive(this, &Game::msg_handler, game_id);
+		pB->receive(this, &Game::msg_handler, game_id);
 		break;
 	case CHESS_FLAG_CHESS_OCCUPY:
 	case CHESS_FLAG_CHESS_OVERFLOW:
 		cs->set_msg_invalid();
 		cs->send();
-		cs->receive(this->msg_handler);
+		cs->receive(this, &Game::msg_handler, game_id);
 		break;
 	default:
 		break;
@@ -206,13 +212,15 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 void Game::ghandler_surrender(session_ptr& cs, session_ptr& os) {
 	os->set_msg_other_surrender();
 	os->send();
-	os->receive(this->msg_handler);
-	cs->receive(this->msg_handler);
+	os->receive(this, &Game::msg_handler, game_id);
+	cs->receive(this, &Game::msg_handler, game_id);
 }
 
 void Game::ghandler_disconnect(session_ptr& cs, session_ptr& os) {
 	os->set_msg_other_disconnect();
 	os->send();
+	game_alive[game_id] = 0;
+	delete this;
 }
 
 void Game::ghandler_restart(session_ptr& cs, session_ptr& os) {
@@ -220,5 +228,5 @@ void Game::ghandler_restart(session_ptr& cs, session_ptr& os) {
 	restart_flag = 1;
 	os->set_msg_other_restart();
 	os->send();
-	os->receive(this->restart_handler);
+	os->receive(this, &Game::restart_handler, game_id);
 }

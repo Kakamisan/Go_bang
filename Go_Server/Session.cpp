@@ -2,43 +2,49 @@
 
 Session::Session(io_service& io, int id) :m_socket(io), session_id(id) {}
 
+tcp::socket & Session::get_socket()
+{
+	// TODO: 在此处插入 return 语句
+	return m_socket;
+}
+
 bool Session::operator==(const Session& other) {
 	if (session_id == other.session_id)return true;
 	return false;
 }
 
 int Session::test_error() {
-	int ec = 0;
-	if (m_ec)ec = 1;
-	return ec;
+	return m_ec;
 }
 
 void Session::update_error(const boost::system::error_code& ec) {
-	m_ec = ec;
+	if (ec)m_ec = 1;
+	else m_ec = 0;
 }
 
 void Session::send() {
 	m_socket.async_write_some(
 		buffer(m_msg.msg_ptr(), MSG_LENTH),
-		boost::bind(
-			[](Session* const cur_se, const boost::system::error_code& ec)
+		/*boost::bind(
+			[](const boost::system::error_code& ec, Session* const cur_se)
 	{
 		cur_se->update_error(ec);
 	},
-			this, boost::asio::placeholders::error)
+			boost::asio::placeholders::error, this)*/
+		boost::bind(&Session::send_handler, this, boost::asio::placeholders::error)
 	);
 }
 
-void Session::receive(const void* const func) {
+void Session::receive(const Game* p, game_func func, int id) {
 	m_socket.async_read_some(buffer(m_msg.msg_ptr(), MSG_LENTH),
-		boost::bind(
-			[func](Session* const cur_se, const boost::system::error_code& ec)
+		/*boost::bind(
+			[p, func](const boost::system::error_code& ec, Session* const cur_se)
 	{
 		cur_se->update_error(ec);
-		boost::bind(func, cur_se)();
+		(const_cast<Game*>(p)->*func)(cur_se);
 	},
-			this, boost::asio::placeholders::error
-		)
+			boost::asio::placeholders::error, this)*/
+		boost::bind(&Session::receive_handler, this, p, func, id, boost::asio::placeholders::error)
 	);
 }
 
@@ -112,4 +118,18 @@ void Session::signal_lock()
 void Session::sighnal_unlock()
 {
 	signal.unlock();
+}
+
+void Session::send_handler(const boost::system::error_code& ec)
+{
+	update_error(ec);
+	if (ec)return;
+}
+
+void Session::receive_handler(const Game * p, game_func func, int id, const boost::system::error_code& ec)
+{
+	update_error(ec);
+	if (ec)return;
+	if (!game_alive[id])return;
+	(const_cast<Game*>(p)->*func)(this);
 }

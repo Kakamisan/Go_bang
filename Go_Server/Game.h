@@ -22,9 +22,12 @@ private:
 
 			//重开标志，表示有一方提出重开，并防止同时提出重开时调用两次重开
 			int restart_flag;
+
+			//Game唯一id
+			int game_id;
 public:
-			//使用两个{session_ptr}构造，代表与两个玩家的session
-			Game(session_ptr A, session_ptr B);
+			//使用两个{session_ptr}和唯一id构造，代表与两个玩家的session
+			Game(session_ptr A, session_ptr B, int id);
 
 			virtual ~Game() { }
 
@@ -68,4 +71,4 @@ private:
 			void ghandler_restart(session_ptr& cs, session_ptr& os);
 };
 
-typedef boost::shared_ptr<Game> game_ptr;
+typedef Game* game_ptr;
