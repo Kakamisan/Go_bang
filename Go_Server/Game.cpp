@@ -47,6 +47,7 @@ void Game::msg_handler(Session* const cur_se) {
 	switch (chead)
 	{
 	case GODATA_HEAD_PLAYERNAME:
+		cs->signal_lock();
 		ghandler_playername(cs, os);
 		break;
 	case GODATA_HEAD_JANKEN:
@@ -86,10 +87,18 @@ void Game::restart_handler(Session* const cur_se){
 }
 
 void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
-	Godata temp = cs->get_msg();
-	os->set_msg(temp);
-	os->set_msg_other_playname();
+	const char* temp = cs->get_msg_data();
+	if ((*cs) == (*pA)) {
+		strcpy_s(name_A, sizeof(name_A), temp);
+	}
+	else {
+		strcpy_s(name_B, sizeof(name_B), temp);
+	}
+	cs->sighnal_unlock();
+	os->signal_lock();
+	os->set_msg_other_playname(temp);
 	os->send();
+	os->sighnal_unlock();
 	os->receive(this->msg_handler);
 }
 
@@ -163,8 +172,7 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 	switch (flag)
 	{
 	case CHESS_FLAG_CONTINUE:
-		os->set_msg(cs->get_msg());
-		os->set_msg_other_set();
+		os->set_msg_other_set(cs->get_msg_data());
 		os->send();
 		os->receive(this->msg_handler);
 		break;

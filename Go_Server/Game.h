@@ -11,6 +11,9 @@ private:
 			//pA为A玩家的session，pB为B玩家的session
 			session_ptr pA, pB;
 
+			//name_A为A玩家昵称，name_B为B玩家昵称
+			char name_A[MSG_LENTH - 1], name_B[MSG_LENTH - 1];
+
 			//棋盘指针，下子时使用该指针调用
 			chess_ptr gameplay;
 

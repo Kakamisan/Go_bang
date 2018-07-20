@@ -21,6 +21,9 @@ private:
 
 			//每个session拥有一个唯一{session_id}
 			int session_id;
+
+			//每个session拥有一个同步信号
+			mutex signal;
 public:
 			//使用{io_service}和{id}构造
 			Session(io_service& io,int id);
@@ -44,12 +47,12 @@ public:
 public:
 			void set_msg_findplayer();
 			void set_msg_janken_result(char);
-			void set_msg_other_set();
+			void set_msg_other_set(const char*);
 			void set_msg_other_surrender();
 			void set_msg_win(char);
 			void set_msg_other_disconnect();
 			void set_msg_other_restart();
-			void set_msg_other_playname();
+			void set_msg_other_playname(const char*);
 			void set_msg_invalid();
 
 			//使用另一个{Godata}复制到当前对象的{Godata}
@@ -63,6 +66,12 @@ public:
 
 			//返回{Godata}的数据报
 			const char* get_msg_data();
+
+			//设置锁
+			void signal_lock();
+
+			//解除锁
+			void sighnal_unlock();
 private:
 			Session(const Session&);
 

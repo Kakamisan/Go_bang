@@ -51,6 +51,8 @@ int Godata::have_other() {
 	if (head == GODATA_HEAD_OTHER_RESTART)return FALSE;
 	if (head == GODATA_HEAD_OTHER_SET)return FALSE;
 	if (head == GODATA_HEAD_OTHER_SURRENDER)return FALSE;
+	if (head == GODATA_HEAD_INVALID)return FALSE;
+	if (head == GODATA_HEAD_ACK)return FALSE;
 	return TRUE;
 }
 
@@ -65,6 +67,12 @@ int Godata::change_data(const char* d) {
 
 int Godata::change_data(const string& str) {
 	return change_data(str.c_str());
+}
+
+int Godata::change_data(char data)
+{
+	m_msg[GODATA_DATA] = data;
+	return TRUE;
 }
 
 char Godata::get_head() {

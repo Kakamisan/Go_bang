@@ -27,6 +27,9 @@ public:
 			//改变数据报，参数为字符串
 			int change_data(const string&);
 
+			//改变数据报，参数为单字符
+			int change_data(char);
+
 			//返回头字节
 			char get_head();
 
