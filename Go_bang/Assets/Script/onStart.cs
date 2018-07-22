@@ -54,6 +54,8 @@ public class onStart : MonoBehaviour {
             text_nick.gameObject.SetActive(false);
             text_ip.gameObject.SetActive(false);
             this.gameObject.SetActive(false);
+            message.text = "连接成功...";
+            message.gameObject.SetActive(true);
             Client.receive();
         }else
         {

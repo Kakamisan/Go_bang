@@ -46,7 +46,8 @@ void Server::accept_handler(session_ptr sp, const boost::system::error_code& ec)
 					m_q_sp.pop();
 
 					static int id = 0;
-					game_ptr new_game(new Game(A, B, id));
+					game_ptr new_game = new Game(A, B, id);
+					std::cout << "game no." << id << " is starting" << std::endl;
 					id++;
 
 					new_game->start();

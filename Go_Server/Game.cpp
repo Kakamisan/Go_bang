@@ -1,7 +1,7 @@
 #include"Game.h"
 
 Game::Game(session_ptr A, session_ptr B, int id)
-	:pA(A), pB(B), game_id(id), gameplay(new Chess()), ready_count(0), restart_flag(0) 
+	:pA(A), pB(B), game_id(id), gameplay(new Chess()), ready_count(0), restart_flag(0), playername_count(0)
 {
 	game_alive[id] = 1;
 }
@@ -9,47 +9,49 @@ Game::Game(session_ptr A, session_ptr B, int id)
 void Game::start() {
 	pA->set_msg_findplayer();
 	pB->set_msg_findplayer();
-	pA->send();
-	pB->send();
+	send(pA);
+	send(pB);
 	run();
 }
 
 void Game::run() {
-	pA->receive(this, &Game::msg_handler, game_id);
-	pB->receive(this, &Game::msg_handler, game_id);
+	receive(pA);
+	receive(pB);
 }
 
 void Game::re_run() {
 	gameplay->reset();
 	ready_count = 0;
+	playername_count = 0;
 	restart_flag = 0;
 	start();
 }
 
-void Game::msg_handler(Session* const cur_se) {
+void Game::msg_handler(session_ptr& cur_se) {
+	std::cout << "id: " << game_id << " -> receive msg" << std::endl;
 	session_ptr cs;
 	session_ptr os;
 	if ((*cur_se) == (*pA)) {
-		cs = pA;
-		os = pB;
+		cs = session_ptr(&(*pA));
+		os = session_ptr(&(*pB));
 	}
 	else if ((*cur_se) == (*pB)) {
-		cs = pB;
-		os = pA;
+		cs = session_ptr(&(*pB));
+		os = session_ptr(&(*pA));
 	}
 	else {
 		std::cout << "Get error session_ptr !" << std::endl;
 		return;
 	}
 	if (cs->test_error()) {
+		std::cout << "session_id : " << cs->get_session_id() << " : test_error true" << std::endl;
 		ghandler_disconnect(cs, os);
 		return;
 	}
-	char chead = cs->get_msg_head();
+	int chead = cs->get_msg_head();
 	switch (chead)
 	{
 	case GODATA_HEAD_PLAYERNAME:
-		cs->signal_lock();
 		ghandler_playername(cs, os);
 		break;
 	case GODATA_HEAD_JANKEN:
@@ -68,17 +70,18 @@ void Game::msg_handler(Session* const cur_se) {
 		ghandler_restart(cs, os);
 		break;
 	default:
+		std::cout << "unknown head" << endl;
 		os->set_msg_other_disconnect();
-		os->send();
+		send(os);
 		cs->set_msg_other_disconnect();
-		cs->send();
+		send(cs);
 		game_alive[game_id] = 0;
 		delete this;
 		break;
 	}
 }
 
-void Game::restart_handler(Session* const cur_se){
+void Game::restart_handler(session_ptr& cur_se){
 	if (cur_se->get_msg_head() == GODATA_HEAD_ACK) {
 		re_run();
 	}
@@ -94,21 +97,27 @@ void Game::restart_handler(Session* const cur_se){
 
 void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 	const char* temp = cs->get_msg_data();
+	std::cout << "playername : " << temp << endl;
 	if ((*cs) == (*pA)) {
 		strcpy_s(name_A, sizeof(name_A), temp);
 	}
 	else {
 		strcpy_s(name_B, sizeof(name_B), temp);
 	}
-	cs->sighnal_unlock();
-	os->signal_lock();
-	os->set_msg_other_playname(temp);
-	os->send();
-	os->sighnal_unlock();
-	os->receive(this, &Game::msg_handler, game_id);
+	playername_count++;
+	std::cout << "playname_count : " << playername_count << endl;
+	if (playername_count < 2)return;
+	pA->set_msg_other_playname(name_B);
+	pB->set_msg_other_playname(name_A);
+	send(pA);
+	send(pB);
+	receive(pA);
+	receive(pB);
+	playername_count = 0;
 }
 
 void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
+	std::cout << "janken" << endl;
 	ready_count++;
 	if (ready_count > 1) {
 		char cc = cs->get_msg_data()[0];
@@ -155,15 +164,16 @@ void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
 				break;
 			}
 		}
-		cs->send();
-		os->send();
+		send(cs);
+		send(os);
 		ready_count = 0;
-		cs->receive(this, &Game::msg_handler, game_id);
-		os->receive(this, &Game::msg_handler, game_id);
+		receive(cs);
+		receive(os);
 	}
 }
 
 void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
+	std::cout << "set" << endl;
 	int x, y;
 	x = cs->get_msg_data()[0];
 	y = cs->get_msg_data()[1];
@@ -179,30 +189,30 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 	{
 	case CHESS_FLAG_CONTINUE:
 		os->set_msg_other_set(cs->get_msg_data());
-		os->send();
-		os->receive(this, &Game::msg_handler, game_id);
+		send(os);
+		receive(os);
 		break;
 	case CHESS_FLAG_A_WIN:
 		pA->set_msg_win(GODATA_DATA_WIN);
 		pB->set_msg_win(GODATA_DATA_LOSE);
-		pA->send();
-		pB->send();
-		pA->receive(this, &Game::msg_handler, game_id);
-		pB->receive(this, &Game::msg_handler, game_id);
+		send(pA);
+		send(pB);
+		receive(pA);
+		receive(pB);
 		break;
 	case CHESS_FLAG_B_WIN:
 		pA->set_msg_win(GODATA_DATA_LOSE);
 		pB->set_msg_win(GODATA_DATA_WIN);
-		pA->send();
-		pB->send();
-		pA->receive(this, &Game::msg_handler, game_id);
-		pB->receive(this, &Game::msg_handler, game_id);
+		send(pA);
+		send(pB);
+		receive(pA);
+		receive(pB);
 		break;
 	case CHESS_FLAG_CHESS_OCCUPY:
 	case CHESS_FLAG_CHESS_OVERFLOW:
 		cs->set_msg_invalid();
-		cs->send();
-		cs->receive(this, &Game::msg_handler, game_id);
+		send(cs);
+		receive(cs);
 		break;
 	default:
 		break;
@@ -210,23 +220,57 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_surrender(session_ptr& cs, session_ptr& os) {
+	std::cout << "surrender" << endl;
 	os->set_msg_other_surrender();
-	os->send();
-	os->receive(this, &Game::msg_handler, game_id);
-	cs->receive(this, &Game::msg_handler, game_id);
+	send(os);
+	receive(os);
+	receive(cs);
 }
 
 void Game::ghandler_disconnect(session_ptr& cs, session_ptr& os) {
+	std::cout << "disconnect" << endl;
 	os->set_msg_other_disconnect();
-	os->send();
+	send(os);
 	game_alive[game_id] = 0;
 	delete this;
 }
 
 void Game::ghandler_restart(session_ptr& cs, session_ptr& os) {
+	std::cout << "restart" << endl;
 	if (restart_flag)return;
 	restart_flag = 1;
 	os->set_msg_other_restart();
-	os->send();
-	os->receive(this, &Game::restart_handler, game_id);
+	send(os);
+	receive(os);
+}
+
+void Game::send(session_ptr& ses) {
+	(ses->get_socket()).async_write_some
+	(
+		buffer((ses->get_msg()).m_msg, MSG_LENTH),
+		boost::bind(&Game::send_handler, this, ses, boost::asio::placeholders::error)
+	);
+}
+
+void Game::send_handler(session_ptr& ses, const boost::system::error_code& ec) {
+	std::cout << "session_id : " << ses->get_session_id() << " : send!" << endl;
+	ses->update_error(ec);
+}
+
+void Game::receive(session_ptr& ses) {
+	(ses->get_socket()).async_read_some
+	(
+		buffer((ses->get_msg()).m_msg, MSG_LENTH),
+		boost::bind(&Game::receive_handler, this, ses, boost::asio::placeholders::error)
+	);
+}
+
+void Game::receive_handler(session_ptr& ses, const boost::system::error_code& ec) {
+	std::cout << "session_id : " << ses->get_session_id() << " : read!" << endl;
+	ses->update_error(ec);
+	if (ec) {
+		std::cout << "session_id : " << ses->get_session_id() << " error" << endl;
+	}
+	if (!game_alive[game_id])return;
+	msg_handler(ses);
 }

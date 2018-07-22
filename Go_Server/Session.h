@@ -5,7 +5,7 @@
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-extern class Game;
+class Game;
 typedef void (Game::*game_func)(Session*);
 
 class Session:public boost::enable_shared_from_this<Session>{
@@ -36,6 +36,8 @@ public:
 			//判断两个session的{session_id}是否相等，相等代表为同一session对象
 			bool operator==(const Session& other);
 
+			int get_session_id();
+
 			//查看是否产生socket错误，产生时返回TRUE
 			int test_error();
 
@@ -46,7 +48,7 @@ public:
 			void send();
 
 			//socket异步等待读取一条消息到{Godata}，并回调{func}
-			void receive(const Game* p, game_func func, int id);
+			void receive(void* p, game_func func, int id);
 public:
 			void set_msg_findplayer();
 			void set_msg_janken_result(char);
@@ -62,7 +64,7 @@ public:
 			void set_msg(const Godata& other);
 
 			//返回{Godata}的引用
-			const Godata& get_msg();
+			Godata& get_msg();
 
 			//返回{Godata}的头字节
 			char get_msg_head();
@@ -82,7 +84,7 @@ private:
 
 			void send_handler(const boost::system::error_code& ec);
 			
-			void receive_handler(const Game* p, game_func func, int id, const boost::system::error_code& ec);
+			void receive_handler(void* p, game_func func, int id, const boost::system::error_code& ec);
 };
 
 typedef boost::shared_ptr<Session> session_ptr;

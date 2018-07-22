@@ -55,12 +55,17 @@
   <ItemGroup>
      <Compile Include="Assets\Script\chess_set.cs" />
      <Compile Include="Assets\Script\Client.cs" />
+     <Compile Include="Assets\Script\Main.cs" />
+     <Compile Include="Assets\Script\onACK.cs" />
+     <Compile Include="Assets\Script\onDisconnect.cs" />
      <Compile Include="Assets\Script\OnMessage.cs" />
      <Compile Include="Assets\Script\onPaper.cs" />
      <Compile Include="Assets\Script\onPause.cs" />
+     <Compile Include="Assets\Script\onRestart.cs" />
      <Compile Include="Assets\Script\onRock.cs" />
      <Compile Include="Assets\Script\onScissors.cs" />
      <Compile Include="Assets\Script\onStart.cs" />
+     <Compile Include="Assets\Script\onSurrender.cs" />
  <Reference Include="UnityEditor.StandardEvents">
  <HintPath>E:/Documents/Visual Studio 2015/Projects/Go_bang/Go_bang/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
  </Reference>

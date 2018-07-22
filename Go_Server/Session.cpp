@@ -13,6 +13,11 @@ bool Session::operator==(const Session& other) {
 	return false;
 }
 
+int Session::get_session_id()
+{
+	return session_id;
+}
+
 int Session::test_error() {
 	return m_ec;
 }
@@ -35,7 +40,7 @@ void Session::send() {
 	);
 }
 
-void Session::receive(const Game* p, game_func func, int id) {
+void Session::receive(void* p, game_func func, int id) {
 	m_socket.async_read_some(buffer(m_msg.msg_ptr(), MSG_LENTH),
 		/*boost::bind(
 			[p, func](const boost::system::error_code& ec, Session* const cur_se)
@@ -98,7 +103,7 @@ void Session::set_msg(const Godata& other) {
 	m_msg = other;
 }
 
-const Godata& Session::get_msg() {
+Godata& Session::get_msg() {
 	return m_msg;
 }
 
@@ -126,10 +131,10 @@ void Session::send_handler(const boost::system::error_code& ec)
 	if (ec)return;
 }
 
-void Session::receive_handler(const Game * p, game_func func, int id, const boost::system::error_code& ec)
+void Session::receive_handler(void* p, game_func func, int id, const boost::system::error_code& ec)
 {
 	update_error(ec);
 	if (ec)return;
 	if (!game_alive[id])return;
-	(const_cast<Game*>(p)->*func)(this);
+	//(reinterpret_cast<Game*>(p)->*func)(this);
 }

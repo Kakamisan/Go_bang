@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using UnityEngine.UI;
+using System;
 
 namespace Net
 {
@@ -50,14 +51,7 @@ namespace Net
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Menu = GameObject.Find("Menu");
             nickname = Menu.transform.Find("nickname").gameObject.GetComponent<InputField>();
-            message = Menu.transform.Find("Message").gameObject.GetComponent<Text>();
-            selfname = Menu.transform.Find("selfname").gameObject.GetComponent<Text>();
-            othername = Menu.transform.Find("othername").gameObject.GetComponent<Text>();
-            pause = Menu.transform.Find("pause").gameObject.GetComponent<Button>();
-            janken_rock = Menu.transform.Find("janken_rock").gameObject.GetComponent<Button>();
-            janken_scissors = Menu.transform.Find("janken_scissors").gameObject.GetComponent<Button>();
-            janken_paper = Menu.transform.Find("janken_paper").gameObject.GetComponent<Button>();
-            //...ing
+            is_gaming = false;
             inited = true;
         }
         public static bool is_inited()
@@ -93,8 +87,10 @@ namespace Net
             try
             {
                 socket.Send(msg);
+                Debug.Log("Send seccussed");
             }catch
             {
+                Debug.Log("Send failed");
                 is_connected = false;
                 socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
@@ -107,6 +103,7 @@ namespace Net
         }
         private static void receive_handler(System.IAsyncResult ar)
         {
+            Debug.Log("Receive a message : " + msg_r.ToString());
             HEAD head = (HEAD)msg_r[0];
             byte[] data = new byte[MSG_LENTH - 1];
             System.Array.Copy(msg_r, 1, data, 0, MSG_LENTH - 1);
@@ -128,48 +125,89 @@ namespace Net
                 case HEAD.WIN:
                     handler_win();
                     break;
+                case HEAD.OTHER_DISCONNECT:
+                    handler_other_disconnect();
+                    break;
+                case HEAD.OTHER_SURRENDER:
+                    handler_other_surrender();
+                    break;
+                case HEAD.OTHER_RESTART:
+                    handler_other_restart();
+                    break;
                 default:
 
                     break;
             }
 
         }
+
+        private static void handler_other_restart()
+        {
+            d_waiting = "对方请求重开";
+            u_waiting = true;
+            sa_waiting = true;
+
+            sa_ACK = true;
+            sa_disconnect = true;
+        }
+
+        private static void handler_other_surrender()
+        {
+            d_waiting = "对方投降";
+            u_waiting = true;
+            sa_waiting = true;
+
+            sa_restart = true;
+            sa_disconnect = true;
+        }
+
         private static void handler_findplayer()
         {
-            selfname.text = nickname.text;
+            Debug.Log("findplayer");
+            game_reset();
+            se_start = true;
+            se_nickname = true;
+            se_host = true;
+
+            d_selfname = nickname.text;
+            u_selfname = true;
             byte head = (byte)HEAD.PLAYERNAME;
-            byte[] data = System.Text.Encoding.ASCII.GetBytes(selfname.text);
+            byte[] data = System.Text.Encoding.ASCII.GetBytes(d_selfname);
             set_msg(head, data);
             send();
             receive();
         }
         private static void handler_other_playname()
         {
+            Debug.Log("other_player");
             char[] name = new char[MSG_LENTH - 1];
             System.Array.Copy(msg_r, 1, name, 0, MSG_LENTH - 1);
-            othername.text = name.ToString();
+            d_othername = name.ToString();
+            u_othername = true;
 
-            selfname.gameObject.SetActive(true);
-            othername.gameObject.SetActive(true);
-            pause.gameObject.SetActive(true);
-            janken_rock.gameObject.SetActive(true);
-            janken_scissors.gameObject.SetActive(true);
-            janken_paper.gameObject.SetActive(true);
+            sa_selfname=true;
+            sa_othername=true;
+            sa_pause=true;
+            sa_janken_rock=true;
+            sa_janken_scissors=true;
+            sa_janken_paper=true;
         }
         private static void handler_janken_result()
         {
+            Debug.Log("janken_result");
             DATA result = (DATA)msg_r[1];
             switch (result)
             {
                 case DATA.JANKEN_DRAW:
-                    janken_rock.gameObject.SetActive(true);
-                    janken_scissors.gameObject.SetActive(true);
-                    janken_paper.gameObject.SetActive(true);
+                    sa_janken_rock=true;
+                    sa_janken_scissors=true;
+                    sa_janken_paper=true;
                     break;
                 case DATA.JANKEN_LOSE:
                     is_gaming = true;
                     chess_other = 1;
                     chess_self = 2;
+                    is_turn = false;
                     receive();
                     break;
                 case DATA.JANKEN_WIN:
@@ -184,32 +222,73 @@ namespace Net
         }
         private static void handler_other_set()
         {
+            Debug.Log("other_set");
             byte[] data = new byte[2];
             System.Array.Copy(msg_r, 1, data, 0, 2);
             int x = (int)data[0];
             int y = (int)data[1];
             chess_board[x, y] = chess_other;
             is_turn = true;
+            se_waiting = true;
         }
         private static void handler_win()
         {
+            Debug.Log("win");
             byte data = msg_r[1];
             if (data == (byte)DATA.JANKEN_WIN)
             {
-                message.text = "You win!";
-                message.gameObject.SetActive(true);
+                d_message = "You win!";
+                sa_message = true;
                 is_gaming = false;
-            }else if (data == (byte)DATA.JANKEN_LOSE)
+                sa_restart = true;
+                sa_disconnect = true;
+            }
+            else if (data == (byte)DATA.JANKEN_LOSE)
             {
-                message.text = "You lose!";
-                message.gameObject.SetActive(true);
+                d_message = "You lose!";
+                sa_message = true;
                 is_gaming = false;
+                sa_restart = true;
+                sa_disconnect = true;
             }else
             {
-                message.text = "未知对局结果，请重开";
-                message.gameObject.SetActive(true);
+                d_message = "未知对局结果，请重开";
+                sa_message = true;
                 is_gaming = false;
+                game_reset();
+                close();
             }
+        }
+        private static void handler_other_disconnect()
+        {
+            d_message = "对方已断开";
+            u_message = true;
+            sa_message = true;
+            game_reset();
+        }
+
+        public static void game_reset()
+        {
+            sa_start = true;
+            sa_host = true;
+            sa_nickname = true;
+
+            se_pause = true;
+            se_restart = true;
+            se_disconnect = true;
+            se_surrender = true;
+            se_selfname = true;
+            se_othername = true;
+            se_surrender = true;
+            se_waiting = true;
+            
+            is_gaming = false;
+            System.Array.Clear(chess_board, 0, 19 * 19);
+        }
+        public static void close()
+        {
+            socket.Close();
+            inited = false;
         }
         /////////////////////////////////////////////////////////////////////////////////////////
         public static int chess_self;
@@ -224,12 +303,42 @@ namespace Net
         static GameObject Menu;
 
         static InputField nickname;
-        static Text message;
-        static Text selfname;
-        static Text othername;
-        static Button pause;
-        static Button janken_rock;
-        static Button janken_scissors;
-        static Button janken_paper;
+        
+        public static bool u_message;
+        public static string d_message;
+        public static bool u_selfname;
+        public static string d_selfname;
+        public static bool u_othername;
+        public static string d_othername;
+        public static bool u_waiting;
+        public static string d_waiting;
+
+        public static bool sa_selfname;
+        public static bool sa_othername;
+        public static bool sa_pause;
+        public static bool sa_janken_rock;
+        public static bool sa_janken_scissors;
+        public static bool sa_janken_paper;
+        public static bool sa_message;
+        public static bool sa_start;
+        public static bool sa_host;
+        public static bool sa_nickname;
+        public static bool sa_waiting;
+        public static bool sa_surrender;
+        public static bool sa_restart;
+        public static bool sa_disconnect;
+        public static bool sa_ACK;
+
+        public static bool se_pause;
+        public static bool se_surrender;
+        public static bool se_restart;
+        public static bool se_disconnect;
+        public static bool se_selfname;
+        public static bool se_othername;
+        public static bool se_waiting;
+        public static bool se_ACK;
+        public static bool se_start;
+        public static bool se_host;
+        public static bool se_nickname;
     }
 }

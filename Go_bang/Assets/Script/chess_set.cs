@@ -81,6 +81,9 @@ public class chess_set : MonoBehaviour {
                             Client.set_msg(head, data);
                             Client.send();
                             Client.is_turn = false;
+                            Client.sa_waiting = true;
+                            Client.d_waiting = "行动中。。。";
+                            Client.u_waiting = true;
                             Client.receive();
                         }
                         return;

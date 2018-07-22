@@ -6,6 +6,7 @@ head :
 using namespace std;
 class Godata {
 			friend class Session;
+			friend class Game;
 private:
 			//数据本体，包括头字节和后续字节
 			char m_msg[MSG_LENTH];
@@ -36,10 +37,11 @@ public:
 
 			//返回数据报指针
 			const char* get_data();
+
+			//返回数据整体的指针
+			char* msg_ptr();
 private:
 			//返回BOOL，为真时表示头字节拥有对应OTHER头
 			int have_other();
 
-			//返回数据整体的指针
-			char* msg_ptr();
 };
