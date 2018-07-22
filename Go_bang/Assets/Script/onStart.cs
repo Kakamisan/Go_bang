@@ -8,6 +8,7 @@ using Net;
 public class onStart : MonoBehaviour {
 
     const int port = 20013;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -44,10 +45,21 @@ public class onStart : MonoBehaviour {
             message.gameObject.SetActive(true);
             return;
         }
-        text_nick.gameObject.SetActive(false);
-        text_ip.gameObject.SetActive(false);
-        this.gameObject.SetActive(false);
-        Client.connect(text_ip.text, port);
-        Client.receive();
+        if (!Client.is_inited())
+        {
+            Client.start();
+        }
+        if(Client.connect(text_ip.text, port))
+        {
+            text_nick.gameObject.SetActive(false);
+            text_ip.gameObject.SetActive(false);
+            this.gameObject.SetActive(false);
+            Client.receive();
+        }else
+        {
+            message.text = "连接服务器失败";
+            message.gameObject.SetActive(true);
+            return;
+        }
     }
 }

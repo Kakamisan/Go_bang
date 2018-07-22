@@ -33,12 +33,9 @@ public class chess_set : MonoBehaviour {
     Vector2 point;
     bool point_down;
 
-    Client client;
-
     // Use this for initialization
     void Start ()
     {
-        client = new Client();
         Client.chess_board = new int[board_size, board_size];
         chess_pos = new Vector2[board_size, board_size];
         LT = cam.WorldToScreenPoint(left_top.transform.position);
@@ -55,7 +52,6 @@ public class chess_set : MonoBehaviour {
                 chess_pos[i, j] = new Vector2(LT.x + grid_x * j, LT.y - grid_y * i);
             }
         }
-        Client.chess_board = new int[board_size, board_size];
 	}
 	
 	// Update is called once per frame
@@ -76,7 +72,7 @@ public class chess_set : MonoBehaviour {
                         chess_ready_pos = chess_pos[i, j];
                         if (Input.GetMouseButtonUp(0) && point_down)
                         {
-                            Client.chess_board[i, j] = Client.chess_sell;
+                            Client.chess_board[i, j] = Client.chess_self;
                             point_down = false;
                             byte head = (byte)HEAD.SET;
                             byte[] data = new byte[2];
@@ -120,10 +116,10 @@ public class chess_set : MonoBehaviour {
                 }
             }
         }
-        if (Client.chess_sell == 1 && chess_ready)
+        if (Client.chess_self == 1 && chess_ready)
         {
             GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), white.texture);
-        }else if (Client.chess_sell == 2 && chess_ready)
+        }else if (Client.chess_self == 2 && chess_ready)
         {
             GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), black.texture);
         }
