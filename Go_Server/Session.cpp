@@ -62,7 +62,7 @@ void Session::set_msg_janken_result(char data) {
 	m_msg.change_data(data);
 }
 
-void Session::set_msg_other_set(const char* data){
+void Session::set_msg_other_set(char* data){
 	m_msg.change_head(GODATA_HEAD_OTHER_SET);
 	m_msg.change_data(data);
 }
@@ -72,10 +72,14 @@ void Session::set_msg_other_surrender()
 	m_msg.change_head(GODATA_HEAD_OTHER_SURRENDER);
 }
 
-void Session::set_msg_win(char data)
+void Session::set_msg_win(char data,char*data2)
 {
 	m_msg.change_head(GODATA_HEAD_WIN);
-	m_msg.change_data(data);
+	char temp[15];
+	temp[0] = data;
+	temp[1] = data2[0];
+	temp[2] = data2[1];
+	m_msg.change_data(temp);
 }
 
 void Session::set_msg_other_disconnect()
@@ -88,7 +92,7 @@ void Session::set_msg_other_restart()
 	m_msg.change_head(GODATA_HEAD_OTHER_RESTART);
 }
 
-void Session::set_msg_other_playname(const char* name)
+void Session::set_msg_other_playname(char* name)
 {
 	m_msg.change_head(GODATA_HEAD_OTHER_PLAYERNAME);
 	m_msg.change_data(name);
@@ -111,7 +115,7 @@ char Session::get_msg_head() {
 	return m_msg.get_head();
 }
 
-const char* Session::get_msg_data() {
+char* Session::get_msg_data() {
 	return m_msg.get_data();
 }
 

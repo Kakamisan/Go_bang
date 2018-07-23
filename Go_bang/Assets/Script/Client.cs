@@ -182,28 +182,33 @@ namespace Net
             Debug.Log("other_player");
             char[] name = new char[MSG_LENTH - 1];
             System.Array.Copy(msg_r, 1, name, 0, MSG_LENTH - 1);
-            d_othername = name.ToString();
+            d_othername = new string(name);
             u_othername = true;
 
-            sa_selfname=true;
+            sa_selfname =true;
             sa_othername=true;
             sa_pause=true;
             sa_janken_rock=true;
             sa_janken_scissors=true;
             sa_janken_paper=true;
+
+            se_waiting = true;
         }
         private static void handler_janken_result()
         {
+            se_waiting = true;
             Debug.Log("janken_result");
             DATA result = (DATA)msg_r[1];
             switch (result)
             {
                 case DATA.JANKEN_DRAW:
-                    sa_janken_rock=true;
+                    Debug.Log("janken_resual_draw");
+                    sa_janken_rock =true;
                     sa_janken_scissors=true;
                     sa_janken_paper=true;
                     break;
                 case DATA.JANKEN_LOSE:
+                    Debug.Log("janken_resual_lose");
                     is_gaming = true;
                     chess_other = 1;
                     chess_self = 2;
@@ -211,12 +216,14 @@ namespace Net
                     receive();
                     break;
                 case DATA.JANKEN_WIN:
+                    Debug.Log("janken_resual_win");
                     is_gaming = true;
                     chess_self = 1;
                     chess_other = 2;
                     is_turn = true;
                     break;
                 default:
+                    Debug.Log("janken_resual_default");
                     break;
             }
         }
@@ -229,6 +236,7 @@ namespace Net
             int y = (int)data[1];
             chess_board[x, y] = chess_other;
             is_turn = true;
+
             se_waiting = true;
         }
         private static void handler_win()
@@ -238,22 +246,33 @@ namespace Net
             if (data == (byte)DATA.JANKEN_WIN)
             {
                 d_message = "You win!";
+                u_message = true;
                 sa_message = true;
                 is_gaming = false;
                 sa_restart = true;
                 sa_disconnect = true;
+                se_waiting = true;
+                receive();
             }
             else if (data == (byte)DATA.JANKEN_LOSE)
             {
+                int x = (int)msg_r[2];
+                int y = (int)msg_r[3];
+                chess_board[x, y] = chess_other;
                 d_message = "You lose!";
+                u_message = true;
                 sa_message = true;
                 is_gaming = false;
                 sa_restart = true;
                 sa_disconnect = true;
+                se_waiting = true;
+                receive();
             }else
             {
                 d_message = "未知对局结果，请重开";
                 sa_message = true;
+                u_message = true;
+                se_waiting = true;
                 is_gaming = false;
                 game_reset();
                 close();
@@ -265,6 +284,7 @@ namespace Net
             u_message = true;
             sa_message = true;
             game_reset();
+            close();
         }
 
         public static void game_reset()
@@ -274,23 +294,24 @@ namespace Net
             sa_nickname = true;
 
             se_pause = true;
+            se_surrender = true;
             se_restart = true;
             se_disconnect = true;
-            se_surrender = true;
             se_selfname = true;
             se_othername = true;
-            se_surrender = true;
             se_waiting = true;
-            
+            se_janken = true;
+            se_ACK = true;
+
             is_gaming = false;
             System.Array.Clear(chess_board, 0, 19 * 19);
         }
         public static void close()
         {
-            socket.Close();
+            socket.Disconnect(true);
             inited = false;
         }
-        /////////////////////////////////////////////////////////////////////////////////////////
+
         public static int chess_self;
         public static int chess_other;
 
@@ -340,5 +361,6 @@ namespace Net
         public static bool se_start;
         public static bool se_host;
         public static bool se_nickname;
+        public static bool se_janken;
     }
 }

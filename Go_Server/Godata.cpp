@@ -60,14 +60,18 @@ int Godata::change_head(int h) {
 	m_msg[GODATA_HEAD] = h;
 	return TRUE;
 }
-int Godata::change_data(const char* d) {
-	strcpy_s(&m_msg[GODATA_DATA], min(sizeof(m_msg) - 1, strlen(d)), d);
+int Godata::change_data(char* d) {
+	//int len_ = strlen(d);
+	int min_ = /*min(*/MSG_LENTH - 1/*, len_)*/;
+	for (int i = 0; i < min_; i++) {
+		m_msg[i + 1] = d[i];
+	}
 	return TRUE;
 }
 
-int Godata::change_data(const string& str) {
-	return change_data(str.c_str());
-}
+//int Godata::change_data(string& str) {
+//	return change_data(str.c_str());
+//}
 
 int Godata::change_data(char data)
 {
@@ -83,7 +87,7 @@ char* Godata::msg_ptr() {
 	return m_msg;
 }
 
-const char * Godata::get_data()
+char * Godata::get_data()
 {
 	return &m_msg[GODATA_DATA];
 }

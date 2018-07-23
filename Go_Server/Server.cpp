@@ -31,14 +31,14 @@ void Server::accept_handler(session_ptr sp, const boost::system::error_code& ec)
 			session_ptr A = m_q_sp.front();
 			session_ptr B;
 			if (A->test_error()) {
-				A.reset();
+				delete A;
 				m_q_sp.pop();
 			}
 			else {
 				m_q_sp.pop();
 				B = m_q_sp.front();
 				if (B->test_error()) {
-					B.reset();
+					delete B;
 					m_q_sp.pop();
 					m_q_sp.push(A);
 				}

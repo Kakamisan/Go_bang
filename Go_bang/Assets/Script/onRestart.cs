@@ -19,6 +19,9 @@ public class onRestart : MonoBehaviour {
         byte head = (byte)HEAD.RESTART;
         Client.set_msg(head, new byte[1]);
         Client.send();
+        Client.d_waiting = "行动中";
+        Client.u_message = true;
+        Client.sa_waiting = true;
         this.gameObject.SetActive(false);
         Client.receive();
     }

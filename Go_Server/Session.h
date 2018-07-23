@@ -52,12 +52,12 @@ public:
 public:
 			void set_msg_findplayer();
 			void set_msg_janken_result(char);
-			void set_msg_other_set(const char*);
+			void set_msg_other_set(char*);
 			void set_msg_other_surrender();
-			void set_msg_win(char);
+			void set_msg_win(char,char*);
 			void set_msg_other_disconnect();
 			void set_msg_other_restart();
-			void set_msg_other_playname(const char*);
+			void set_msg_other_playname(char*);
 			void set_msg_invalid();
 
 			//使用另一个{Godata}复制到当前对象的{Godata}
@@ -70,7 +70,7 @@ public:
 			char get_msg_head();
 
 			//返回{Godata}的数据报
-			const char* get_msg_data();
+			char* get_msg_data();
 
 			//设置锁
 			void signal_lock();
@@ -87,4 +87,5 @@ private:
 			void receive_handler(void* p, game_func func, int id, const boost::system::error_code& ec);
 };
 
-typedef boost::shared_ptr<Session> session_ptr;
+//typedef boost::shared_ptr<Session> session_ptr;
+typedef Session* session_ptr;

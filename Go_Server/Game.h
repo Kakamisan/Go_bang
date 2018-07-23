@@ -30,9 +30,7 @@ private:
 public:
 			//使用两个{session_ptr}和唯一id构造，代表与两个玩家的session
 			Game(session_ptr A, session_ptr B, int id);
-
-			virtual ~Game() { }
-
+			
 			//Game对象启动方法
 			void start();
 private:

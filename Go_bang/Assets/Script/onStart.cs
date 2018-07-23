@@ -54,8 +54,12 @@ public class onStart : MonoBehaviour {
             text_nick.gameObject.SetActive(false);
             text_ip.gameObject.SetActive(false);
             this.gameObject.SetActive(false);
+            Client.sa_disconnect = true;
             message.text = "连接成功...";
             message.gameObject.SetActive(true);
+            Client.d_waiting = "连接中";
+            Client.u_message = true;
+            Client.sa_waiting = true;
             Client.receive();
         }else
         {

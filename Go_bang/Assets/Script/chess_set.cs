@@ -61,16 +61,16 @@ public class chess_set : MonoBehaviour {
         {
             point = Input.mousePosition;
             if (Input.GetMouseButtonDown(0)) point_down = true;
-
+        
             for (int i = 0; i < board_size; i++)
             {
                 for (int j = 0; j < board_size; j++)
                 {
-                    if (Client.chess_board[i, j] == 0 && Distance(point, chess_pos[i, j]) < (grid_x + grid_y) / 4)
+                    if (Client.chess_board[i, j] != 1 && (Distance(point, chess_pos[i, j]) < (grid_x + grid_y) / 4))
                     {
                         chess_ready = true;
                         chess_ready_pos = chess_pos[i, j];
-                        if (Input.GetMouseButtonUp(0) && point_down)
+                        if (Input.GetMouseButtonDown(0) && point_down)
                         {
                             Client.chess_board[i, j] = Client.chess_self;
                             point_down = false;
@@ -82,7 +82,7 @@ public class chess_set : MonoBehaviour {
                             Client.send();
                             Client.is_turn = false;
                             Client.sa_waiting = true;
-                            Client.d_waiting = "行动中。。。";
+                            Client.d_waiting = "行动中";
                             Client.u_waiting = true;
                             Client.receive();
                         }
@@ -91,7 +91,6 @@ public class chess_set : MonoBehaviour {
                     else
                     {
                         chess_ready = false;
-                        return;
                     }
                 }
             }
@@ -105,13 +104,14 @@ public class chess_set : MonoBehaviour {
 
     void OnGUI()
     {
-        for(int i = 0; i < board_size; i++)
+
+        for (int i = 0; i < board_size; i++)
         {
-            for(int j = 0; j < board_size; j++)
+            for (int j = 0; j < board_size; j++)
             {
                 if (Client.chess_board[i, j] == 1)
                 {
-                    GUI.DrawTexture(new Rect(chess_pos[i, j].x - grid_x / 2+1, Screen.height-chess_pos[i, j].y - grid_y / 2+1, grid-2, grid-2), white.texture);
+                    GUI.DrawTexture(new Rect(chess_pos[i, j].x - grid_x / 2 + 1, Screen.height - chess_pos[i, j].y - grid_y / 2 + 1, grid - 2, grid - 2), white.texture);
                 }
                 if (Client.chess_board[i, j] == 2)
                 {
@@ -119,12 +119,16 @@ public class chess_set : MonoBehaviour {
                 }
             }
         }
-        if (Client.chess_self == 1 && chess_ready)
+        if (Client.is_gaming)
         {
-            GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), white.texture);
-        }else if (Client.chess_self == 2 && chess_ready)
-        {
-            GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), black.texture);
+            if (Client.chess_self == 1 && chess_ready)
+            {
+                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), white.texture);
+            }
+            else if (Client.chess_self == 2 && chess_ready)
+            {
+                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), black.texture);
+            }
         }
     }
 }

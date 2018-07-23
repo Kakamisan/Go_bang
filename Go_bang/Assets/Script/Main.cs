@@ -108,6 +108,11 @@ public class Main : MonoBehaviour {
             surrender.gameObject.SetActive(false);
             Client.se_surrender = false;
         }
+        if (Client.u_waiting)
+        {
+            waiting.text = Client.d_waiting;
+            Client.u_waiting = false;
+        }
         if (Client.sa_waiting)
         {
             waiting.gameObject.SetActive(true);
@@ -117,11 +122,6 @@ public class Main : MonoBehaviour {
         {
             waiting.gameObject.SetActive(false);
             Client.se_waiting = false;
-        }
-        if (Client.u_waiting)
-        {
-            waiting.text = Client.d_waiting;
-            Client.u_waiting = false;
         }
         if (Client.sa_restart)
         {
@@ -157,6 +157,13 @@ public class Main : MonoBehaviour {
         {
             nickname.gameObject.SetActive(false);
             Client.se_nickname = false;
+        }
+        if (Client.se_janken)
+        {
+            janken_paper.gameObject.SetActive(false);
+            janken_rock.gameObject.SetActive(false);
+            janken_scissors.gameObject.SetActive(false);
+            Client.se_janken = false;
         }
 	}
 

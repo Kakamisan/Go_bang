@@ -24,10 +24,10 @@ public:
 			int change_head(int);
 
 			//改变数据报，参数为字符串
-			int change_data(const char*);
+			int change_data(char*);
 
 			//改变数据报，参数为字符串
-			int change_data(const string&);
+			//int change_data(string&);
 
 			//改变数据报，参数为单字符
 			int change_data(char);
@@ -36,7 +36,7 @@ public:
 			char get_head();
 
 			//返回数据报指针
-			const char* get_data();
+			char* get_data();
 
 			//返回数据整体的指针
 			char* msg_ptr();

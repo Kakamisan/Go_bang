@@ -20,6 +20,9 @@ public class onSurrender : MonoBehaviour {
         byte[] data = { 1 };
         Client.set_msg(head, data);
         Client.send();
+        Client.d_waiting = "行动中";
+        Client.u_message = true;
+        Client.sa_waiting = true;
         this.gameObject.SetActive(false);
         Client.receive();
     }

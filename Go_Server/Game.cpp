@@ -69,6 +69,9 @@ void Game::msg_handler(session_ptr& cur_se) {
 	case GODATA_HEAD_RESTART:
 		ghandler_restart(cs, os);
 		break;
+	case GODATA_HEAD_ACK:
+		re_run();
+		break;
 	default:
 		std::cout << "unknown head" << endl;
 		os->set_msg_other_disconnect();
@@ -107,6 +110,7 @@ void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 	playername_count++;
 	std::cout << "playname_count : " << playername_count << endl;
 	if (playername_count < 2)return;
+	std::cout << name_A << " " << name_B << endl;
 	pA->set_msg_other_playname(name_B);
 	pB->set_msg_other_playname(name_A);
 	send(pA);
@@ -193,16 +197,16 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 		receive(os);
 		break;
 	case CHESS_FLAG_A_WIN:
-		pA->set_msg_win(GODATA_DATA_WIN);
-		pB->set_msg_win(GODATA_DATA_LOSE);
+		pA->set_msg_win(GODATA_DATA_WIN,cs->get_msg_data());
+		pB->set_msg_win(GODATA_DATA_LOSE, cs->get_msg_data());
 		send(pA);
 		send(pB);
 		receive(pA);
 		receive(pB);
 		break;
 	case CHESS_FLAG_B_WIN:
-		pA->set_msg_win(GODATA_DATA_LOSE);
-		pB->set_msg_win(GODATA_DATA_WIN);
+		pA->set_msg_win(GODATA_DATA_LOSE, cs->get_msg_data());
+		pB->set_msg_win(GODATA_DATA_WIN, cs->get_msg_data());
 		send(pA);
 		send(pB);
 		receive(pA);
@@ -253,7 +257,7 @@ void Game::send(session_ptr& ses) {
 }
 
 void Game::send_handler(session_ptr& ses, const boost::system::error_code& ec) {
-	std::cout << "session_id : " << ses->get_session_id() << " : send!" << endl;
+	std::cout << "session_id : " << ses->get_session_id() << " : send!" << "msg : " << (int)((ses->get_msg()).get_head()) << " " << (int)((ses->get_msg_data())[0]) << " " << (int)((ses->get_msg_data())[1]) << endl;
 	ses->update_error(ec);
 }
 
