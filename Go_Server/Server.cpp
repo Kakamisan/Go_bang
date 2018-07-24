@@ -30,7 +30,7 @@ void Server::accept_handler(session_ptr sp, const boost::system::error_code& ec)
 		while (m_q_sp.size() > 1) {
 			session_ptr A = m_q_sp.front();
 			session_ptr B;
-			if (A->test_error()) {
+			if (A->test_disconnect()) {
 				delete A;
 				m_q_sp.pop();
 			}

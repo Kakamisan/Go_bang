@@ -31,7 +31,7 @@ public class onStart : MonoBehaviour {
             message.gameObject.SetActive(true);
             return;
         }
-        Regex reg = new Regex(@"(?=(\b|\D))(((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))(?=(\b|\D))");
+        Regex reg = new Regex(@"^(((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))\.){3}((\d{1,2})|(1\d{1,2})|(2[0-4]\d)|(25[0-5]))$");
         if (!reg.IsMatch(text_ip.text))
         {
             message.text = "请检查主机ip";
@@ -56,9 +56,9 @@ public class onStart : MonoBehaviour {
             this.gameObject.SetActive(false);
             Client.sa_disconnect = true;
             message.text = "连接成功...";
-            message.gameObject.SetActive(true);
             Client.d_waiting = "连接中";
-            Client.u_message = true;
+            Client.u_waiting = true;
+            message.gameObject.SetActive(true);
             Client.sa_waiting = true;
             Client.receive();
         }else

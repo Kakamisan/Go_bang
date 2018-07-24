@@ -24,6 +24,7 @@ public class onSurrender : MonoBehaviour {
         Client.u_message = true;
         Client.sa_waiting = true;
         this.gameObject.SetActive(false);
+        Client.se_restart = true;
         Client.receive();
     }
 }

@@ -72,6 +72,9 @@ public class chess_set : MonoBehaviour {
                         chess_ready_pos = chess_pos[i, j];
                         if (Input.GetMouseButtonDown(0) && point_down)
                         {
+                            Client.last_x = i;
+                            Client.last_y = j;
+                            Client.last_chess = Client.chess_board[i, j];
                             Client.chess_board[i, j] = Client.chess_self;
                             point_down = false;
                             byte head = (byte)HEAD.SET;

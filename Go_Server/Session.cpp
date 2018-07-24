@@ -22,6 +22,14 @@ int Session::test_error() {
 	return m_ec;
 }
 
+int Session::test_disconnect() {
+	m_msg.change_head(GODATA_HEAD_TEST);
+	boost::system::error_code ec;
+	m_socket.write_some(buffer(m_msg.msg_ptr(), MSG_LENTH), ec);
+	update_error(ec);
+	return test_error();
+}
+
 void Session::update_error(const boost::system::error_code& ec) {
 	if (ec)m_ec = 1;
 	else m_ec = 0;
@@ -40,7 +48,7 @@ void Session::send() {
 	);
 }
 
-void Session::receive(void* p, game_func func, int id) {
+void Session::receive() {
 	m_socket.async_read_some(buffer(m_msg.msg_ptr(), MSG_LENTH),
 		/*boost::bind(
 			[p, func](const boost::system::error_code& ec, Session* const cur_se)
@@ -49,7 +57,7 @@ void Session::receive(void* p, game_func func, int id) {
 		(const_cast<Game*>(p)->*func)(cur_se);
 	},
 			boost::asio::placeholders::error, this)*/
-		boost::bind(&Session::receive_handler, this, p, func, id, boost::asio::placeholders::error)
+		boost::bind(&Session::receive_handler, this, boost::asio::placeholders::error)
 	);
 }
 
@@ -132,13 +140,10 @@ void Session::sighnal_unlock()
 void Session::send_handler(const boost::system::error_code& ec)
 {
 	update_error(ec);
-	if (ec)return;
 }
 
-void Session::receive_handler(void* p, game_func func, int id, const boost::system::error_code& ec)
+void Session::receive_handler(const boost::system::error_code& ec)
 {
 	update_error(ec);
-	if (ec)return;
-	if (!game_alive[id])return;
 	//(reinterpret_cast<Game*>(p)->*func)(this);
 }

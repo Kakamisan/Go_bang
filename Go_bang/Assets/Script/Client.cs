@@ -27,7 +27,8 @@ namespace Net
         PLAYERNAME,
         OTHER_PLAYERNAME,
         INVALID,
-        ACK
+        ACK,
+        TEST
     }
     public enum DATA
     {
@@ -91,9 +92,12 @@ namespace Net
             }catch
             {
                 Debug.Log("Send failed");
+                d_message = "连接出现异常";
+                u_message = true;
+                sa_message = true;
                 is_connected = false;
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
+                game_reset();
+                close();
             }
         }
         public static void receive()
@@ -110,6 +114,9 @@ namespace Net
 
             switch (head)
             {
+                case HEAD.TEST:
+                    receive();
+                    break;
                 case HEAD.FINDPLAYER:
                     handler_findplayer();
                     break;
@@ -134,11 +141,24 @@ namespace Net
                 case HEAD.OTHER_RESTART:
                     handler_other_restart();
                     break;
+                case HEAD.INVALID:
+                    handler_invalid();
+                    break;
                 default:
-
+                    game_reset();
+                    close();
                     break;
             }
 
+        }
+
+        private static void handler_invalid()
+        {
+            chess_board[last_x, last_y] = last_chess;
+            is_turn = true;
+            d_message = "下子位置错误，请重下";
+            u_message = true;
+            sa_message = true;
         }
 
         private static void handler_other_restart()
@@ -224,6 +244,8 @@ namespace Net
                     break;
                 default:
                     Debug.Log("janken_resual_default");
+                    game_reset();
+                    close();
                     break;
             }
         }
@@ -308,7 +330,8 @@ namespace Net
         }
         public static void close()
         {
-            socket.Disconnect(true);
+            socket.Shutdown(SocketShutdown.Both);
+            socket.Close();
             inited = false;
         }
 
@@ -362,5 +385,8 @@ namespace Net
         public static bool se_host;
         public static bool se_nickname;
         public static bool se_janken;
+
+        public static int last_x, last_y;
+        public static int last_chess;
     }
 }

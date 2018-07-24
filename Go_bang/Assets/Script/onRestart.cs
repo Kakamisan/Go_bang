@@ -23,6 +23,7 @@ public class onRestart : MonoBehaviour {
         Client.u_message = true;
         Client.sa_waiting = true;
         this.gameObject.SetActive(false);
+        Client.se_surrender = true;
         Client.receive();
     }
 }

@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 public class onWaiting : MonoBehaviour {
 
-    private Text waiting;
+    public Text waiting;
     string first_str;
 	// Use this for initialization
 	void Start () {
-        waiting = this.gameObject.GetComponent<Text>();
-	}
+        //waiting = this.gameObject.GetComponent<Text>();
+        Invoke("change2f", 0.6f);
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -19,7 +20,6 @@ public class onWaiting : MonoBehaviour {
     void OnEnable()
     {
         first_str = waiting.text;
-        Invoke("change2f", 0.6f);
     }
 
     void change2f()

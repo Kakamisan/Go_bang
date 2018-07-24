@@ -41,6 +41,8 @@ public:
 			//查看是否产生socket错误，产生时返回TRUE
 			int test_error();
 
+			int test_disconnect();
+
 			//socket连接时调用，更新session的{error_code}
 			void update_error(const boost::system::error_code& ec);
 
@@ -48,7 +50,7 @@ public:
 			void send();
 
 			//socket异步等待读取一条消息到{Godata}，并回调{func}
-			void receive(void* p, game_func func, int id);
+			void receive();
 public:
 			void set_msg_findplayer();
 			void set_msg_janken_result(char);
@@ -84,7 +86,7 @@ private:
 
 			void send_handler(const boost::system::error_code& ec);
 			
-			void receive_handler(void* p, game_func func, int id, const boost::system::error_code& ec);
+			void receive_handler(const boost::system::error_code& ec);
 };
 
 //typedef boost::shared_ptr<Session> session_ptr;
