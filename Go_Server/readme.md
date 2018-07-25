@@ -1,5 +1,5 @@
-#服务端
-##构成
+# 服务端
+## 构成
 主要由<br>
 - Server.class：服务类，接收socket连接，创建session实例，并分配到一个新的Game实例中<br>
 - Game.class：游戏处理类，管理两个session实例，从客户端接收到消息，处理后向客户端发送消息<br>
