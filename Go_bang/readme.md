@@ -11,4 +11,3 @@
 ![](https://i.loli.net/2018/07/25/5b58294dd79e2.png "gaming")<br>
 ![](https://i.loli.net/2018/07/25/5b582956a32d5.png "game over")<br>
 ![](https://i.loli.net/2018/07/25/5b582960b3e29.png "restart")<br>
-![](https://i.loli.net/2018/07/25/5b5829659464f.png "server simple log")<br>
