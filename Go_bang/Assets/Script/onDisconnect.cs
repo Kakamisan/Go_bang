@@ -19,6 +19,7 @@ public class onDisconnect : MonoBehaviour {
         byte head = (byte)HEAD.DISCONNECT;
         Client.set_msg(head, new byte[1]);
         Client.send();
+        Client.se_message = true;
         Client.game_reset();
         Client.close();
     }

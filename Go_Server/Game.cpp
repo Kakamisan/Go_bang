@@ -178,17 +178,16 @@ void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
 
 void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 	std::cout << "set" << endl;
-	int x, y;
-	x = cs->get_msg_data()[0];
-	y = cs->get_msg_data()[1];
+	char tempdata[2];
+	tempdata[0] = cs->get_msg_data()[0];
+	tempdata[1] = cs->get_msg_data()[1];
 	int flag;
 	if ((*cs) == (*pA)) {
-		flag = gameplay->put_chess(x, y, CHESS_A);
+		flag = gameplay->put_chess(tempdata[0], tempdata[1], CHESS_A);
 	}
 	else {
-		flag = gameplay->put_chess(x, y, CHESS_B);
+		flag = gameplay->put_chess(tempdata[0], tempdata[1], CHESS_B);
 	}
-	
 	switch (flag)
 	{
 	case CHESS_FLAG_CONTINUE:
@@ -197,16 +196,16 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 		receive(os);
 		break;
 	case CHESS_FLAG_A_WIN:
-		pA->set_msg_win(GODATA_DATA_WIN,cs->get_msg_data());
-		pB->set_msg_win(GODATA_DATA_LOSE, cs->get_msg_data());
+		pA->set_msg_win(GODATA_DATA_WIN, tempdata);
+		pB->set_msg_win(GODATA_DATA_LOSE, tempdata);
 		send(pA);
 		send(pB);
 		receive(pA);
 		receive(pB);
 		break;
 	case CHESS_FLAG_B_WIN:
-		pA->set_msg_win(GODATA_DATA_LOSE, cs->get_msg_data());
-		pB->set_msg_win(GODATA_DATA_WIN, cs->get_msg_data());
+		pA->set_msg_win(GODATA_DATA_LOSE, tempdata);
+		pB->set_msg_win(GODATA_DATA_WIN, tempdata);
 		send(pA);
 		send(pB);
 		receive(pA);

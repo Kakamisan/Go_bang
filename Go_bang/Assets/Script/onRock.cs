@@ -7,12 +7,10 @@ public class onRock : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
 	}
 
     public void onclick()
@@ -27,9 +25,11 @@ public class onRock : MonoBehaviour {
         Client.set_msg(head, data);
         Client.send();
         Client.d_waiting = "行动中";
+        Client.u_waiting = true;
         Client.u_message = true;
         Client.sa_waiting = true;
         Client.receive();
     }
     public Button b2, b3;
+    
 }

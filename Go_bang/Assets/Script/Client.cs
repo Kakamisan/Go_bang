@@ -263,6 +263,7 @@ namespace Net
         }
         private static void handler_win()
         {
+            se_pause = true;
             Debug.Log("win");
             byte data = msg_r[1];
             if (data == (byte)DATA.JANKEN_WIN)
@@ -373,6 +374,7 @@ namespace Net
         public static bool sa_disconnect;
         public static bool sa_ACK;
 
+        public static bool se_message;
         public static bool se_pause;
         public static bool se_surrender;
         public static bool se_restart;

@@ -13,6 +13,11 @@ public class Main : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (Client.se_message)
+        {
+            message.gameObject.SetActive(false);
+            Client.se_message = false;
+        }
         if (Client.u_selfname)
         {
             selfname.text = Client.d_selfname;

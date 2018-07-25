@@ -19,6 +19,8 @@ public class chess_set : MonoBehaviour {
     
     public Sprite white;
     public Sprite black;
+    public Texture white_t;
+    public Texture black_t;
 
     public Camera cam;
 
@@ -122,15 +124,15 @@ public class chess_set : MonoBehaviour {
                 }
             }
         }
-        if (Client.is_gaming)
+        if (Client.is_gaming&&Client.is_turn)
         {
             if (Client.chess_self == 1 && chess_ready)
             {
-                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), white.texture);
+                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), white_t);
             }
             else if (Client.chess_self == 2 && chess_ready)
             {
-                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), black.texture);
+                GUI.DrawTexture(new Rect(chess_ready_pos.x - grid_x / 2 + 1, Screen.height - chess_ready_pos.y - grid_y / 2 + 1, grid - 2, grid - 2), black_t);
             }
         }
     }
