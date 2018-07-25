@@ -28,7 +28,7 @@ void Game::re_run() {
 }
 
 void Game::msg_handler(session_ptr& cur_se) {
-	std::cout << "id: " << game_id << " -> receive msg" << std::endl;
+	//std::cout << "id: " << game_id << " -> receive msg" << std::endl;
 	session_ptr cs;
 	session_ptr os;
 	if ((*cur_se) == (*pA)) {
@@ -100,7 +100,7 @@ void Game::restart_handler(session_ptr& cur_se){
 
 void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 	const char* temp = cs->get_msg_data();
-	std::cout << "playername : " << temp << endl;
+	//std::cout << "playername : " << temp << endl;
 	if ((*cs) == (*pA)) {
 		strcpy_s(name_A, sizeof(name_A), temp);
 	}
@@ -108,9 +108,9 @@ void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 		strcpy_s(name_B, sizeof(name_B), temp);
 	}
 	playername_count++;
-	std::cout << "playname_count : " << playername_count << endl;
+	//std::cout << "playname_count : " << playername_count << endl;
 	if (playername_count < 2)return;
-	std::cout << name_A << " " << name_B << endl;
+	//std::cout << name_A << " " << name_B << endl;
 	pA->set_msg_other_playname(name_B);
 	pB->set_msg_other_playname(name_A);
 	send(pA);
@@ -121,7 +121,7 @@ void Game::ghandler_playername(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
-	std::cout << "janken" << endl;
+	//std::cout << "janken" << endl;
 	ready_count++;
 	if (ready_count > 1) {
 		char cc = cs->get_msg_data()[0];
@@ -165,6 +165,14 @@ void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
 				}
 				break;
 			default:
+				std::cout << "unknown janken_data" << endl;
+				os->set_msg_other_disconnect();
+				send(os);
+				cs->set_msg_other_disconnect();
+				send(cs);
+				game_alive[game_id] = 0;
+				delete this;
+				return;
 				break;
 			}
 		}
@@ -177,7 +185,7 @@ void Game::ghandler_janken(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
-	std::cout << "set" << endl;
+	//std::cout << "set" << endl;
 	char tempdata[2];
 	tempdata[0] = cs->get_msg_data()[0];
 	tempdata[1] = cs->get_msg_data()[1];
@@ -223,7 +231,7 @@ void Game::ghandler_set(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_surrender(session_ptr& cs, session_ptr& os) {
-	std::cout << "surrender" << endl;
+	//std::cout << "surrender" << endl;
 	os->set_msg_other_surrender();
 	send(os);
 	receive(os);
@@ -231,7 +239,7 @@ void Game::ghandler_surrender(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_disconnect(session_ptr& cs, session_ptr& os) {
-	std::cout << "disconnect" << endl;
+	//std::cout << "disconnect" << endl;
 	os->set_msg_other_disconnect();
 	send(os);
 	game_alive[game_id] = 0;
@@ -239,7 +247,7 @@ void Game::ghandler_disconnect(session_ptr& cs, session_ptr& os) {
 }
 
 void Game::ghandler_restart(session_ptr& cs, session_ptr& os) {
-	std::cout << "restart" << endl;
+	//std::cout << "restart" << endl;
 	if (restart_flag)return;
 	restart_flag = 1;
 	os->set_msg_other_restart();
@@ -256,7 +264,7 @@ void Game::send(session_ptr& ses) {
 }
 
 void Game::send_handler(session_ptr& ses, const boost::system::error_code& ec) {
-	std::cout << "session_id : " << ses->get_session_id() << " : send!" << "msg : " << (int)((ses->get_msg()).get_head()) << " " << (int)((ses->get_msg_data())[0]) << " " << (int)((ses->get_msg_data())[1]) << endl;
+	//std::cout << "session_id : " << ses->get_session_id() << " : send!" << "msg : " << (int)((ses->get_msg()).get_head()) << " " << (int)((ses->get_msg_data())[0]) << " " << (int)((ses->get_msg_data())[1]) << endl;
 	ses->update_error(ec);
 }
 
@@ -269,7 +277,7 @@ void Game::receive(session_ptr& ses) {
 }
 
 void Game::receive_handler(session_ptr& ses, const boost::system::error_code& ec) {
-	std::cout << "session_id : " << ses->get_session_id() << " : read!" << endl;
+	//std::cout << "session_id : " << ses->get_session_id() << " : read!" << endl;
 	ses->update_error(ec);
 	if (ec) {
 		std::cout << "session_id : " << ses->get_session_id() << " error" << endl;

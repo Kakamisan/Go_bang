@@ -23,11 +23,22 @@ int Session::test_error() {
 }
 
 int Session::test_disconnect() {
+	//std::cout << "test!!!" << endl;
 	m_msg.change_head(GODATA_HEAD_TEST);
 	boost::system::error_code ec;
-	m_socket.write_some(buffer(m_msg.msg_ptr(), MSG_LENTH), ec);
-	update_error(ec);
-	return test_error();
+	m_socket.write_some(buffer(m_msg.msg_ptr(), MSG_LENTH), ec); 
+	if (ec) {
+		//std::cout << "error!" << endl;
+		return 1;
+	}
+	char tempmsg[MSG_LENTH + 1];
+	m_socket.read_some(buffer(tempmsg, MSG_LENTH + 1), ec);
+	if (ec) {
+		//std::cout << "error!" << endl;
+		return 1;
+	}
+	//std::cout << "no error!" << endl;
+	return 0;
 }
 
 void Session::update_error(const boost::system::error_code& ec) {

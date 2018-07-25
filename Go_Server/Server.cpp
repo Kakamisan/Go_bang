@@ -28,22 +28,24 @@ void Server::accept_new_session() {
 void Server::accept_handler(session_ptr sp, const boost::system::error_code& ec) {
 	if (!ec&&sp) {
 		while (m_q_sp.size() > 1) {
-			session_ptr A = m_q_sp.front();
-			session_ptr B;
-			if (A->test_disconnect()) {
-				delete A;
+			if (m_q_sp.front()->test_disconnect()) {
+				delete m_q_sp.front();
 				m_q_sp.pop();
+				//std::cout << "A is error!" << endl;
 			}
 			else {
+				session_ptr A = m_q_sp.front();
 				m_q_sp.pop();
-				B = m_q_sp.front();
-				if (B->test_error()) {
-					delete B;
+				if (m_q_sp.front()->test_disconnect()) {
+					delete m_q_sp.front();
 					m_q_sp.pop();
+					//std::cout << "B is error!" << endl;
 					m_q_sp.push(A);
 				}
 				else {
+					session_ptr B = m_q_sp.front();
 					m_q_sp.pop();
+					//std::cout << "A & B is normal!" << endl;
 
 					static int id = 0;
 					game_ptr new_game = new Game(A, B, id);

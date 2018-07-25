@@ -115,6 +115,23 @@ namespace Net
             switch (head)
             {
                 case HEAD.TEST:
+                    byte[] tempmsg = new byte[MSG_LENTH + 1];
+                    tempmsg[0] = 1;
+                    tempmsg[MSG_LENTH] = 1;
+                    try
+                    {
+                        socket.Send(tempmsg);
+                    }
+                    catch
+                    {
+                        d_message = "连接出现异常";
+                        u_message = true;
+                        sa_message = true;
+                        is_connected = false;
+                        game_reset();
+                        close();
+                        return;
+                    }
                     receive();
                     break;
                 case HEAD.FINDPLAYER:
