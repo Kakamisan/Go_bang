@@ -23,6 +23,7 @@ public class chess_set : MonoBehaviour {
     public Texture black_t;
 
     public Camera cam;
+    public AudioSource fx_1;
 
     float grid_x;
     float grid_y;
@@ -79,6 +80,7 @@ public class chess_set : MonoBehaviour {
                             Client.last_chess = Client.chess_board[i, j];
                             Client.chess_board[i, j] = Client.chess_self;
                             point_down = false;
+                            fx_1.Play();
                             byte head = (byte)HEAD.SET;
                             byte[] data = new byte[2];
                             data[0] = (byte)i;

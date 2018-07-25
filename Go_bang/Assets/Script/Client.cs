@@ -159,6 +159,7 @@ namespace Net
             d_message = "下子位置错误，请重下";
             u_message = true;
             sa_message = true;
+            se_waiting = true;
         }
 
         private static void handler_other_restart()
@@ -195,6 +196,7 @@ namespace Net
             byte[] data = System.Text.Encoding.ASCII.GetBytes(d_selfname);
             set_msg(head, data);
             send();
+            msg_r[0] = (byte)HEAD.TEST;
             receive();
         }
         private static void handler_other_playname()
@@ -233,6 +235,7 @@ namespace Net
                     chess_other = 1;
                     chess_self = 2;
                     is_turn = false;
+                    msg_r[0] = (byte)HEAD.TEST;
                     receive();
                     break;
                 case DATA.JANKEN_WIN:
@@ -258,7 +261,7 @@ namespace Net
             int y = (int)data[1];
             chess_board[x, y] = chess_other;
             is_turn = true;
-
+            sa_fx_1 = true;
             se_waiting = true;
         }
         private static void handler_win()
@@ -275,6 +278,7 @@ namespace Net
                 sa_restart = true;
                 sa_disconnect = true;
                 se_waiting = true;
+                msg_r[0] = (byte)HEAD.TEST;
                 receive();
             }
             else if (data == (byte)DATA.JANKEN_LOSE)
@@ -282,6 +286,7 @@ namespace Net
                 int x = (int)msg_r[2];
                 int y = (int)msg_r[3];
                 chess_board[x, y] = chess_other;
+                sa_fx_1 = true;
                 d_message = "You lose!";
                 u_message = true;
                 sa_message = true;
@@ -289,6 +294,7 @@ namespace Net
                 sa_restart = true;
                 sa_disconnect = true;
                 se_waiting = true;
+                msg_r[0] = (byte)HEAD.TEST;
                 receive();
             }else
             {
@@ -325,6 +331,7 @@ namespace Net
             se_waiting = true;
             se_janken = true;
             se_ACK = true;
+            sa_fx_1 = false;
 
             is_gaming = false;
             System.Array.Clear(chess_board, 0, 19 * 19);
@@ -373,6 +380,7 @@ namespace Net
         public static bool sa_restart;
         public static bool sa_disconnect;
         public static bool sa_ACK;
+        public static bool sa_fx_1;
 
         public static bool se_message;
         public static bool se_pause;

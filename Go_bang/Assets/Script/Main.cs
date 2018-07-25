@@ -12,7 +12,20 @@ public class Main : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
+        if (Client.se_janken)
+        {
+            janken_paper.gameObject.SetActive(false);
+            janken_rock.gameObject.SetActive(false);
+            janken_scissors.gameObject.SetActive(false);
+            Client.se_janken = false;
+        }
+        if (Client.sa_fx_1)
+        {
+            fx_1.Play();
+            Client.sa_fx_1 = false;
+        }
         if (Client.se_message)
         {
             message.gameObject.SetActive(false);
@@ -163,13 +176,6 @@ public class Main : MonoBehaviour {
             nickname.gameObject.SetActive(false);
             Client.se_nickname = false;
         }
-        if (Client.se_janken)
-        {
-            janken_paper.gameObject.SetActive(false);
-            janken_rock.gameObject.SetActive(false);
-            janken_scissors.gameObject.SetActive(false);
-            Client.se_janken = false;
-        }
 	}
 
     public Text selfname;
@@ -187,4 +193,5 @@ public class Main : MonoBehaviour {
     public Button surrender;
     public Text waiting;
     public Button ACK;
+    public AudioSource fx_1;
 }
