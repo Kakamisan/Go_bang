@@ -161,6 +161,8 @@ namespace Net
                 case HEAD.INVALID:
                     handler_invalid();
                     break;
+                case HEAD.NULL:
+                    break;
                 default:
                     game_reset();
                     close();
@@ -213,7 +215,7 @@ namespace Net
             byte[] data = System.Text.Encoding.ASCII.GetBytes(d_selfname);
             set_msg(head, data);
             send();
-            msg_r[0] = (byte)HEAD.TEST;
+            msg_r[0] = (byte)HEAD.NULL;
             receive();
         }
         private static void handler_other_playname()
@@ -252,7 +254,7 @@ namespace Net
                     chess_other = 1;
                     chess_self = 2;
                     is_turn = false;
-                    msg_r[0] = (byte)HEAD.TEST;
+                    msg_r[0] = (byte)HEAD.NULL;
                     receive();
                     break;
                 case DATA.JANKEN_WIN:
@@ -295,7 +297,7 @@ namespace Net
                 sa_restart = true;
                 sa_disconnect = true;
                 se_waiting = true;
-                msg_r[0] = (byte)HEAD.TEST;
+                msg_r[0] = (byte)HEAD.NULL;
                 receive();
             }
             else if (data == (byte)DATA.JANKEN_LOSE)
@@ -311,7 +313,7 @@ namespace Net
                 sa_restart = true;
                 sa_disconnect = true;
                 se_waiting = true;
-                msg_r[0] = (byte)HEAD.TEST;
+                msg_r[0] = (byte)HEAD.NULL;
                 receive();
             }else
             {
