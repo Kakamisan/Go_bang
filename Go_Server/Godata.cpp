@@ -69,6 +69,7 @@ int Godata::change_data(char* d) {
 	return TRUE;
 }
 
+//
 //int Godata::change_data(string& str) {
 //	return change_data(str.c_str());
 //}
